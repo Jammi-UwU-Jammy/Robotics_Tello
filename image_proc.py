@@ -2,7 +2,9 @@ from utils_image import *
 from djitellopy import Tello
 import cv2, numpy as np
 import time
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
+
+centroid = None
 
 
 def getGreen(path):
@@ -45,8 +47,8 @@ def getGreenFromVid(img):
     return result
 
 
-def contouring():
-    img = cv2.imread('saved_img/an_img_obj0323_120942.png')
+def contouring(img):
+    # img = cv2.imread('saved_img/an_img_obj0323_120942.png')
     green = getGreenFromVid(img)
     gray = cv2.cvtColor(green, cv2.COLOR_BGR2GRAY)
 
@@ -66,46 +68,27 @@ def contouring():
     M = cv2.moments(largest_contour)
 
 # calculate x and y coordinates of centroid
-    cx = int(M["m10"] / M["m00"])
-    cy = int(M["m01"] / M["m00"])
+    try:
+        cx = int(M["m10"] / M["m00"])
+        cy = int(M["m01"] / M["m00"])
 
     # create a tuple of (x, y) coordinates for the centroid
-    centroid = (cx, cy)
+        centroid = (cx, cy)
 
-    # Draw the largest contour on the original image
-    cv2.drawContours(img, [largest_contour], -1, (0, 0, 255), 2)
-    cv2.circle(img, centroid, 5, (0, 0, 255), -1)
+        # Draw the largest contour on the original image
+        cv2.drawContours(img, [largest_contour], -1, (0, 0, 255), 2)
+        cv2.circle(img, centroid, 5, (0, 0, 255), -1)
 
-    # Show the result
-    cv2.imshow('Result', img)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+        # Show the result
+        cv2.imshow('Result', img)
+        return centroid
+    except ZeroDivisionError:
+        # print("Obj not in sight")
+        cv2.imshow('Result', img)
 
 
 def main():
-    img_path = "./saved_img/an_img_obj0323_120942.png"
-    image = cv2.imread(img_path)
-    rgbimg = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-
-    #plt has pixel coordinates in case need testing 
-    # plt.imshow(image)
-    # plt.waitforbuttonpress()
-    # plt.close('all')
-    #Pixel coord is (y,x) ?*
-    pixel = image[227,355]#[64,712]
-    print(pixel)
-    contouring()
-
-    # cv2.imshow("img", getGreenFromVid(image))
-    # cv2.waitKey(0)
-    # cv2.destroyAllWindows()
-
-    
-
-
-
-
-            
+    pass
 
 
 if __name__ == '__main__':
