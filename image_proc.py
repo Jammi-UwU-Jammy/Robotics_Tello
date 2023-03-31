@@ -37,7 +37,7 @@ def getGreen2(path):
 
 def getGreenFromVid(img):
     image = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-    hsv = cv2.cvtColor(image,cv2.COLOR_BGR2HSV)
+    # hsv = cv2.cvtColor(image,cv2.COLOR_BGR2HSV)
     # worked
     lower = np.array([35,150,60])
     upper = np.array([70,255,255])

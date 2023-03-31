@@ -9,16 +9,18 @@ w, h = 1280, 720
 centroid = None
 
 
-def telloGetFrame(theDrone, w=360, h=240):
-    myFrame = theDrone.get_frame_read()
-    myFrame = myFrame.frame
-    img = cv2.resize(myFrame, (w, h))
+def telloGetFrame(the_drone, w=360, h=240):
+    my_frame = the_drone.get_frame_read()
+    my_frame = my_frame.frame
+    img = cv2.resize(my_frame, (w, h))
     return img
+
 
 def run_robot(drone):
     count = 0
     while True:
         # Step 1
+        global w,h
         img = telloGetFrame(drone, w, h)
         # cv2.imshow('Image', getGreenFromVid(img=img))
         global centroid 
@@ -28,27 +30,44 @@ def run_robot(drone):
             break
 
 
-def flight_controller(drone:Tello):
-    async def main(): #this is a function declared inside of another function
-        try:
-            drone.takeoff()
+def flight_controller(drone: Tello):
+    async def flight_main():  # this is a function declared inside of another function
+        #try:
+            # drone.takeoff()
+            print(f"battery: {drone.get_battery()}%")
             await asyncio.sleep(0.5)
             print("taken off")
+            pixel_error = (0, 0)
+            global centroid,w,h
+            x_thresh = 20
             while True:
-                drone.rotate_clockwise(20)
-                asyncio.sleep(0.8)
-                print("turning")
+                await asyncio.sleep(0.8)
+                #print("turning")
+                print(f"centroid: {centroid}")
                 if centroid is not None:
-                    print(f"found! {centroid}")
-                    drone.land()
-                    time.sleep(2)
-                    break
-        finally:
-            print("stream off")
-            drone.streamoff()
-            drone.end()
+                    error_x = centroid[0] - w/2
+                    error_y = centroid[1] - h/2
+                    pixel_error = (error_x, error_y)
+                    print(f"error: {pixel_error}")
 
-    asyncio.run(main())
+                    if pixel_error[0] < -x_thresh:
+                        drone.rotate_counter_clockwise(2)
+                    if pixel_error[0] > x_thresh:
+                        drone.rotate_clockwise(2)
+                    else:
+                        print("Within range")  # move forward
+
+                # if centroid is not None:
+                #     print(f"found! {centroid}")
+                #     drone.land()
+                #     time.sleep(2)
+                #     break
+        #finally:
+            #print("stream off")
+            #drone.streamoff()
+            #drone.end()
+
+    asyncio.run(flight_main())
 
 
 def main():
@@ -67,11 +86,12 @@ def main():
     drone.connect()
     drone.streamon()
     time.sleep(2)
-    fly_thread = Thread(target=flight_controller, daemon=True, kwargs={"drone":drone})
+    fly_thread = Thread(target=flight_controller, daemon=True, kwargs={"drone": drone})
     fly_thread.start()
     # drone.takeoff()
     run_robot(drone)
     cv2.destroyAllWindows()
+
 
 if __name__ == '__main__':
     main()
