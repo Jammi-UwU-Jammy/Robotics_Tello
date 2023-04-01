@@ -5,12 +5,11 @@ from GetVideo import w, h
 
 def getGreenFromVid(img):
     image = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-    # hsv = cv2.cvtColor(image,cv2.COLOR_BGR2HSV)
-    # worked
-    lower = np.array([35, 150, 60])
+    blurred = cv2.GaussianBlur(image, (19, 19), 3)
+    lower = np.array([35, 183, 170])
     upper = np.array([70, 255, 255])
 
-    mask = cv2.inRange(image, lower, upper)
+    mask = cv2.inRange(blurred, lower, upper)
     result = cv2.bitwise_and(image, image, mask=mask)
     return result
 
@@ -57,6 +56,7 @@ def contouring(img):
     except ZeroDivisionError:
         # print("Obj not in sight")
         cv2.imshow('Result', img)
+        return None, None
 
 
 def main():

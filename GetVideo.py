@@ -23,25 +23,22 @@ def run_robot(drone):
         # Step 1
         global w, h, centroid, area
         img = telloGetFrame(drone)
-        try:
-            centroid, area = image_proc.contouring(img)
-        except Exception:
-            pass
+        centroid, area = image_proc.contouring(img)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             drone.streamoff()
             break
 
 
 def flight_controller(drone: Tello):
-    # noinspection PyTypeChecker,PyUnresolvedReferences
     async def flight_main():  # this is a function declared inside another function
         try:
             drone.takeoff()
             await asyncio.sleep(0.5)
             print("taken off")
             global w, h, centroid, area
-            deg_thresh = 5
-            area_thresh = w * h * 0.4
+            deg_thresh_x = 5
+            deg_thresh_y = 3
+            area_thresh = w * h * 0.45
             while True:
                 await asyncio.sleep(0.8)
                 print(f"centroid: {centroid}")
@@ -54,15 +51,15 @@ def flight_controller(drone: Tello):
                     deg_error_y = px_error_y * 22 / h
                     print(f"Degree error: {(deg_error_x, deg_error_y)}")
 
-                    if abs(deg_error_x) > deg_thresh:
+                    if abs(deg_error_x) > deg_thresh_x:
                         drone.rotate_clockwise(int(deg_error_x))
                         print("turning")
                         await asyncio.sleep(.5)
-                    if deg_error_y > deg_thresh:
+                    if deg_error_y > deg_thresh_y:
                         drone.move_down(20)
                         print("moving down")
                         await asyncio.sleep(.5)
-                    elif deg_error_y < -deg_thresh:
+                    elif deg_error_y < -deg_thresh_y:
                         drone.move_up(20)
                         print("moving up")
                         await asyncio.sleep(.5)
@@ -72,19 +69,23 @@ def flight_controller(drone: Tello):
                             break
                         else:
                             print("Within bearing range")
-                            print(f"area: {round(area / (w * h) * 100)}%")
+                            print(f"area: {area} cm^2, {round(area / (w * h) * 100)}%")
                             move_dist = int(2 / (area / (w * h)))
                             if move_dist > 150:
                                 move_dist = 150
                             if move_dist < 20:
                                 move_dist = 20
                             drone.move_forward(move_dist)
+                else:
+                    print("target not detected, rotating")
+                    drone.rotate_clockwise(50)
         except Exception as e:
             print(repr(e))
         finally:
-            print("stream off and land")
+            print("arrived at target, stream off and land")
             drone.streamoff()
             drone.land()
+            print(f"battery: {drone.get_battery()}%")
             drone.end()
 
     asyncio.run(flight_main())
