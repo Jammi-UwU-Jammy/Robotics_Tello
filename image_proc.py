@@ -53,7 +53,7 @@ def contouring(img):
 
         # Show the result
         cv2.imshow('Result', img)
-        return centroid
+        return centroid, max_area
     except ZeroDivisionError:
         # print("Obj not in sight")
         cv2.imshow('Result', img)
