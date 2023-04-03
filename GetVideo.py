@@ -69,7 +69,7 @@ def flight_controller(drone: Tello):
                             break
                         else:
                             print("Within bearing range")
-                            print(f"area: {area} cm^2, {round(area / (w * h) * 100)}%")
+                            print(f"area: {area} px, {round(area / (w * h) * 100)}%")
                             move_dist = int(2 / (area / (w * h)))
                             if move_dist > 150:
                                 move_dist = 150
