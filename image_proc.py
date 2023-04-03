@@ -42,16 +42,20 @@ def contouring(img):
         # create a tuple of (x, y) coordinates for the centroid
         centroid = (cx, cy)
 
-        # Draw the largest contour on the original image
-        cv2.drawContours(img, [largest_contour], -1, (0, 0, 255), 2)
-        cv2.circle(img, centroid, 5, (0, 0, 255), -1)
+        min_area_thresh = 0.002
+        if max_area > w*h*min_area_thresh:
+            # Draw the largest contour on the original image
+            cv2.drawContours(img, [largest_contour], -1, (0, 0, 255), 2)
+            cv2.circle(img, centroid, 5, (0, 0, 255), -1)
 
-        # draw crosshair to easier see center of camera
-        cv2.line(img, (0, int(h / 2)), (w, int(h / 2)), (194, 194, 194), 1)  # horizontal
-        cv2.line(img, (int(w / 2), 0), (int(w / 2), h), (194, 194, 194), 1)  # vertical
+            # draw crosshair to easier see center of camera
+            cv2.line(img, (0, int(h / 2)), (w, int(h / 2)), (194, 194, 194), 1)  # horizontal
+            cv2.line(img, (int(w / 2), 0), (int(w / 2), h), (194, 194, 194), 1)  # vertical
 
         # Show the result
         cv2.imshow('Result', img)
+        if max_area < w*h*min_area_thresh:
+            return None, None
         return centroid, max_area
     except ZeroDivisionError:
         # print("Obj not in sight")
