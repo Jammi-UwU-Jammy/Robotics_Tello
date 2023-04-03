@@ -31,6 +31,8 @@ def contouring(img):
             largest_contour = contour
             max_area = area
 
+    # print(f"area: {max_area} px")
+
     ####
     m = cv2.moments(largest_contour)
 
@@ -42,6 +44,8 @@ def contouring(img):
         # create a tuple of (x, y) coordinates for the centroid
         centroid = (cx, cy)
 
+        # min_area_thresh = .002
+        # if max_area > w * h * min_area_thresh:
         # Draw the largest contour on the original image
         cv2.drawContours(img, [largest_contour], -1, (0, 0, 255), 2)
         cv2.circle(img, centroid, 5, (0, 0, 255), -1)
@@ -52,6 +56,8 @@ def contouring(img):
 
         # Show the result
         cv2.imshow('Result', img)
+        # if max_area < w * h * min_area_thresh:
+        #     return None, None
         return centroid, max_area
     except ZeroDivisionError:
         # print("Obj not in sight")

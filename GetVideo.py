@@ -38,7 +38,7 @@ def flight_controller(drone: Tello):
             global w, h, centroid, area
             deg_thresh_x = 5
             deg_thresh_y = 3
-            area_thresh = w * h * 0.45
+            area_thresh = w * h * 0.42
             while True:
                 await asyncio.sleep(0.8)
                 print(f"centroid: {centroid}")
@@ -99,7 +99,6 @@ def main():
     time.sleep(2)
     fly_thread = Thread(target=flight_controller, daemon=True, kwargs={"drone": drone})
     fly_thread.start()
-    # drone.takeoff()
     run_robot(drone)
     cv2.destroyAllWindows()
 
