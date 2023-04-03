@@ -1,5 +1,4 @@
 import asyncio
-import math
 from threading import Thread
 from djitellopy import Tello
 import cv2
@@ -7,7 +6,6 @@ import time
 import image_proc
 
 w, h = 1280, 720
-camera_center = (w/2, h/2)
 centroid = None
 area = None
 
