@@ -6,7 +6,7 @@ from GetVideo import w, h
 def getGreenFromVid(img):
     image = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     blurred = cv2.GaussianBlur(image, (19, 19), 3)
-    lower = np.array([35, 183, 170])
+    lower = np.array([35, 160, 130])
     upper = np.array([70, 255, 255])
 
     mask = cv2.inRange(blurred, lower, upper)
