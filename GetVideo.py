@@ -22,7 +22,6 @@ def telloGetFrame(the_drone):
 
 def run_robot(drone):
     while True:
-        # Step 1
         global w, h, centroid, area
         img = telloGetFrame(drone)
         centroid, area = image_proc.contouring(img)
