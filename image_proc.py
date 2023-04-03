@@ -1,48 +1,15 @@
-from utils_image import *
-from djitellopy import Tello
-import cv2, numpy as np
-import time
-# import matplotlib.pyplot as plt
-
-centroid = None
-
-
-def getGreen(path):
-    oimage = cv2.imread(path)
-    #h, w, d = image.shape
-    image = cv2.cvtColor(oimage, cv2.COLOR_BGR2HSV)
-    hsv = cv2.cvtColor(image,cv2.COLOR_BGR2HSV)
-    # worked
-    lower = np.array([35,150,60])
-    upper = np.array([70,255,255])
-
-    mask = cv2.inRange(image, lower, upper)
-    result = cv2.bitwise_and(image, image, mask=mask)
-    # cv2.imshow('result', result)
-    # cv2.waitKey()
-
-def getGreen2(path):
-    img = cv2.imread(path)
-    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-
-    # lower bound and upper bound for Green color
-    lower_bound = np.array([35,150,40])	 
-    upper_bound = np.array([100,255,255])
-
-    # find the colors within the boundaries
-    mask = cv2.inRange(hsv, lower_bound, upper_bound)
-    # cv2.imshow('result', mask)
-    # cv2.waitKey()
+import cv2
+import numpy as np
+from GetVideo import w, h
 
 
 def getGreenFromVid(img):
     image = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-    hsv = cv2.cvtColor(image,cv2.COLOR_BGR2HSV)
-    # worked
-    lower = np.array([35,150,60])
-    upper = np.array([70,255,255])
+    blurred = cv2.GaussianBlur(image, (19, 19), 3)
+    lower = np.array([35, 160, 130])
+    upper = np.array([70, 255, 255])
 
-    mask = cv2.inRange(image, lower, upper)
+    mask = cv2.inRange(blurred, lower, upper)
     result = cv2.bitwise_and(image, image, mask=mask)
     return result
 
@@ -65,26 +32,35 @@ def contouring(img):
             max_area = area
 
     ####
-    M = cv2.moments(largest_contour)
+    m = cv2.moments(largest_contour)
 
-# calculate x and y coordinates of centroid
+    # calculate x and y coordinates of centroid
     try:
-        cx = int(M["m10"] / M["m00"])
-        cy = int(M["m01"] / M["m00"])
+        cx = int(m["m10"] / m["m00"])
+        cy = int(m["m01"] / m["m00"])
 
-    # create a tuple of (x, y) coordinates for the centroid
+        # create a tuple of (x, y) coordinates for the centroid
         centroid = (cx, cy)
 
-        # Draw the largest contour on the original image
-        cv2.drawContours(img, [largest_contour], -1, (0, 0, 255), 2)
-        cv2.circle(img, centroid, 5, (0, 0, 255), -1)
+        min_area_thresh = 0.002
+        if max_area > w*h*min_area_thresh:
+            # Draw the largest contour on the original image
+            cv2.drawContours(img, [largest_contour], -1, (0, 0, 255), 2)
+            cv2.circle(img, centroid, 5, (0, 0, 255), -1)
+
+            # draw crosshair to easier see center of camera
+            cv2.line(img, (0, int(h / 2)), (w, int(h / 2)), (194, 194, 194), 1)  # horizontal
+            cv2.line(img, (int(w / 2), 0), (int(w / 2), h), (194, 194, 194), 1)  # vertical
 
         # Show the result
         cv2.imshow('Result', img)
-        return centroid
+        if max_area < w*h*min_area_thresh:
+            return None, None
+        return centroid, max_area
     except ZeroDivisionError:
         # print("Obj not in sight")
         cv2.imshow('Result', img)
+        return None, None
 
 
 def main():
@@ -93,4 +69,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-    pass
