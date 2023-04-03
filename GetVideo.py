@@ -97,9 +97,8 @@ def main():
     print(f"battery: {drone.get_battery()}%")
     drone.streamon()
     time.sleep(2)
-    # fly_thread = Thread(target=flight_controller, daemon=True, kwargs={"drone": drone})
-    # fly_thread.start()
-    # drone.takeoff()
+    fly_thread = Thread(target=flight_controller, daemon=True, kwargs={"drone": drone})
+    fly_thread.start()
     run_robot(drone)
     cv2.destroyAllWindows()
 
